@@ -1,43 +1,41 @@
 //jshint esversion:6
 
+require("dotenv").config(); // Load environment variables
 const express = require("express");
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const date = require(__dirname + "/date.js");
 const lodash = require("lodash");
-mongoose.connect("mongodb://localhost:27017/toDoListItems")
 
-const itemsSchema ={
-  name:{
+// Use the MongoDB URI from the .env file
+const mongoURI = process.env.MONGODB_URI;
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.log("MongoDB connection error:", err));
+
+const itemsSchema = {
+  name: {
     type: String
   }
-}
+};
 
 const listSchema = {
   name: String,
   value: [itemsSchema]
-}
+};
 
-const lists = mongoose.model("list", listSchema)
-const items = mongoose.model("item", itemsSchema)
+const lists = mongoose.model("list", listSchema);
+const items = mongoose.model("item", itemsSchema);
 
 const i1 = new items({
   name: "Press '+' this to add item"
-})
+});
 
 const i2 = new items({
   name: "<-- Press to delete items"
-})
+});
 
-const defaultValues = [i1, i2]
-
-// items.insertMany(defaultValues)
-//   .then(()=>{
-//     console.log("Inserted Succesfully")
-//   })
-//   .catch((err)=>{
-//     console.log(err)
-//   })
+const defaultValues = [i1, i2];
 
 const app = express();
 
@@ -45,8 +43,6 @@ app.set('view engine', 'ejs');
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
-
-
 
 app.get("/", function(req, res) {
 
@@ -121,8 +117,6 @@ app.get("/:customName", function(req,res){
       }
   })
 })
-
-
 
 app.get("/about", function(req, res){
   res.render("about");
